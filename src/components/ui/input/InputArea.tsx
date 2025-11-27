@@ -2,10 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { StatusButton } from "./StatusButton";
 import { useSocketContext } from "../../../context/SocketProvider";
 
-interface WSMessage {
-  token?: string;
-  done?: boolean;
-}
+
 
 export const InputArea: React.FC<{
   value: string;
