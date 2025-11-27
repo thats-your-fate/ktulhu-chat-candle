@@ -28,17 +28,27 @@ function ensureTs(value: any, fallback?: number): number {
   return fallback ?? Date.now();
 }
 
+function cleanSummaryText(value: any): string | null {
+  if (!value) return null;
+  let text = String(value).trim();
+  text = text.replace(/<\/s>\s*$/i, ""); // strip model end token
+  text = text.replace(/^Topic\s+tag:\s*/i, ""); // strip topic-tag prefix
+  text = text.replace(/^\?\s*/, ""); // stray leading question marks
+  text = text.trim();
+  return text || null;
+}
+
 function normalizeSummaryPayload(payload: any): ChatSummary | null {
   if (!payload?.chat_id) return null;
 
   // Prefer summary/text fields for display
-  const summaryText = payload.text ?? payload.summary ?? null;
+  const summaryText = cleanSummaryText(payload.text ?? payload.summary ?? null);
   const ts = ensureTs(payload.ts, undefined);
 
   return {
     chat_id: payload.chat_id,
     summary: summaryText,
-    text: payload.text ?? null,
+    text: cleanSummaryText(payload.text ?? payload.summary ?? null),
     ts,
   };
 }
@@ -52,7 +62,7 @@ export function applyChatSummaryUpdate(payload: any) {
     ...existing,
     ...next,
     ts: ensureTs(next.ts, existing?.ts ?? Date.now()),
-    summary: next.summary ?? existing?.summary ?? existing?.text ?? null,
+    summary: cleanSummaryText(next.summary ?? existing?.summary ?? existing?.text ?? null),
     text: existing?.text ?? null,
   };
 
@@ -77,8 +87,19 @@ function normalizeBaseUrl(url: string): string {
   return url.replace(/\/+$/, ""); // remove trailing slashes
 }
 
+function normalizeToWs(url: string): string {
+  if (url.startsWith("http://")) return url.replace("http://", "ws://");
+  if (url.startsWith("https://")) return url.replace("https://", "wss://");
+  return url.startsWith("ws") ? url : `wss://${url}`;
+}
+
 function makeWsUrl(baseUrl: string): string {
-  return "ws://localhost:3000/ws";
+  const envWs = (import.meta as any)?.env?.VITE_WEB_SOCK_BASE_URL as string | undefined;
+  const raw = envWs && envWs.trim()
+    ? normalizeBaseUrl(envWs)
+    : `${normalizeBaseUrl(baseUrl)}/chat-summary/ws`;
+
+  return normalizeToWs(raw);
 }
 
 /* ---------------------------------------------------
@@ -200,8 +221,8 @@ export function useChatSummaries({
       const tsValue =
         Number(latestSummary?.ts) || Number(latestMsg?.ts) || Date.now();
 
-      const summaryText = latestSummary?.text ?? latestSummary?.summary ?? null;
-      const text = summaryText ?? latestMsg?.text ?? latestMsg?.summary ?? null;
+      const summaryText = cleanSummaryText(latestSummary?.text ?? latestSummary?.summary ?? null);
+      const text = summaryText ?? cleanSummaryText(latestMsg?.text ?? latestMsg?.summary ?? null);
 
       return {
         chat_id: chatId,

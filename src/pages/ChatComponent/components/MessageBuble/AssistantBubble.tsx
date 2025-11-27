@@ -6,7 +6,17 @@ interface AssistantBubbleProps {
 }
 
 export const AssistantBubble: React.FC<AssistantBubbleProps> = ({ content }) => {
-console.log("ASSISTANT BUBBLE CONTENT:", JSON.stringify(content));
+  const sanitize = (value: string): string => {
+    if (!value) return "";
+    let next = value;
+    next = next.replace(/<\|im_end\|>/gi, ""); // strip template end tokens
+    next = next.replace(/<\/s>/gi, ""); // strip model end markers
+    next = next.replace(/^Topic\s+tag:\s*/i, ""); // drop topic tag prefix
+    next = next.replace(/^\?\s*/, ""); // stray leading question mark
+    return next.trim();
+  };
+
+  const safeContent = sanitize(content);
   return (
     <div
 
@@ -17,7 +27,7 @@ console.log("ASSISTANT BUBBLE CONTENT:", JSON.stringify(content));
         space-y-4
       `}
     >
-        <MarkdownRenderer key={content.length} content={content} />
+        <MarkdownRenderer key={safeContent.length} content={safeContent} />
 
     </div>
   );

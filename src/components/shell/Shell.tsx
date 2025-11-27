@@ -19,7 +19,7 @@ export const Shell: React.FC = React.memo(() => {
   // Read initial theme safely
   const [theme, setTheme] = useState<"light" | "dark">(() => {
     const saved = localStorage.getItem("theme");
-    return saved === "dark" ? "dark" : "light";
+    return saved === "light" ? "light" : "dark";
   });
 
   // Apply theme on mount
