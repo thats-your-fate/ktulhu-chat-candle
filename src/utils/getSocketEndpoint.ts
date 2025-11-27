@@ -18,7 +18,7 @@ export function getSocketEndpoint(): string {
   if (tunnel && tunnel.trim()) return normalizeToWs(tunnel);
 
 
-  return "wss://inference.ktulhu.com";
+  return "wss://backend.ktulhu.com/";
 }
 
 /** Convert http/https → ws/wss */
