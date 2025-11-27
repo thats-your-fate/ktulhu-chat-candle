@@ -12,7 +12,7 @@ type ShellHeaderProps = {
   endpoint: string;
   onSwap: () => void;
   onToggleTheme: () => void;
-  theme: "light" | "dark";   // ← 🔥 REQUIRED NOW
+  theme: "dark" | "light" ;   // ← 🔥 REQUIRED NOW
 };
 
 export const ShellHeaderDesktop: React.FC<ShellHeaderProps> = ({
