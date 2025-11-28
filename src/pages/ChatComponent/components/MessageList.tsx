@@ -38,17 +38,16 @@ export const MessageList: React.FC<MessageListProps> = ({ history, loading = fal
 
   if (!loading && !history?.length) {
     return (
-      <div className="flex flex-col flex-1 items-center justify-center text-center select-none px-6">
+<div className="flex flex-col flex-1 items-center justify-center text-center select-none px-6 h-full">
+  <p className="text-3xl font-semibold text-gray-700 dark:text-gray-200 mb-1">
+    What’s on your mind?
+  </p>
 
-        <p className="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-1">
-          What’s on your mind?
-        </p>
+  <p className="text-xl text-gray-500 dark:text-gray-400 opacity-80">
+    Ask Ktulhu AI Chat.
+  </p>
+</div>
 
-        <p className="text-base text-gray-500 dark:text-gray-400 opacity-80">
-          Ask Ktulhu AI Chat.
-        </p>
-
-      </div>
     );
   }
 

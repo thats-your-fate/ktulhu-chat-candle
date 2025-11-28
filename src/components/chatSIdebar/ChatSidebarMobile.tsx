@@ -7,6 +7,8 @@ import { useChatSummaries } from "../../hooks/useChatSummaries";
 import { ChatList } from "./ChatList";
 
 import { deleteChatThread, createNewChat } from "./utils/chatActions";
+import { KtulhuLogo } from "../KtulhuLogo";
+
 
 export const ChatSidebarMobile: React.FC<{ onSelectChat?: (id: string) => void }> = ({
   onSelectChat,
@@ -40,14 +42,24 @@ export const ChatSidebarMobile: React.FC<{ onSelectChat?: (id: string) => void }
   };
 
   return (
-    <div className="relative">
+    <div className="relative w-full w-full px-9">
       {/* Burger Button */}
+
+<div className="flex flex-row justify-between">
+      <KtulhuLogo size={44}/> 
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="p-2 text-gray-800 dark:text-gray-200"
+        className="
+        flex items-center justify-center
+        rounded-md p-2 transition-opacity duration-150
+        text-chat-item-text dark:text-chat-item-text-dark
+        bg-chat-item-bg dark:bg-chat-item-bg-dark
+        
+      "
       >
         {isOpen ? <X size={22} /> : <Menu size={22} />}
       </button>
+      </div>
 
       {/* Overlay + drawer */}
       {isOpen && (

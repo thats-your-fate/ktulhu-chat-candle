@@ -184,9 +184,10 @@ export default function ChatComponent() {
             placeholder={isSending ? "Model is thinking..." : "Send a message..."}
             disabled={isSending}
           />
-          <div className="text-xs text-gray-500 mt-2">
-            Chat ID: {chatId} • Model: {DEFAULT_MODEL}
-          </div>
+<div className="text-xs text-gray-500 mt-2 hidden sm:block">
+  Chat ID: {chatId} • Model: {DEFAULT_MODEL}
+</div>
+
         </div>
       </Pannel>
     </Container>

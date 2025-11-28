@@ -103,7 +103,7 @@ export const ShellHeaderDesktop: React.FC<ShellHeaderProps> = ({
               <span className="text-xs text-red-600 ml-1">{lastError}</span>
             )}
 
-            {/* 🌙 Theme Toggle */}
+            {/* Theme Toggle */}
             <button
               onClick={onToggleTheme}
               className="

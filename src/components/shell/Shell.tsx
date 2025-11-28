@@ -7,6 +7,8 @@ import { useIsMobile } from "../../hooks/useIsMobile";
 import { ChatSidebar } from "../chatSIdebar";
 import { ChatSidebarMobile } from "../chatSIdebar/ChatSidebarMobile";
 
+
+
 export const Shell: React.FC = React.memo(() => {
   const location = useLocation();
   const [endpoint, setEndpoint] = useState(getSocketEndpoint());
@@ -63,7 +65,7 @@ export const Shell: React.FC = React.memo(() => {
   }, [endpoint]);
 
   /* --------------------------------------------------------
-     🚦 Navigation links
+      Navigation links
   -------------------------------------------------------- */
   const navLinks = useMemo(
     () => [
@@ -97,7 +99,7 @@ export const Shell: React.FC = React.memo(() => {
       {/* Header */}
       {isMobile ? (
         <div className="flex items-center justify-between border-b border-header-border dark:border-header-border-dark bg-header-bg dark:bg-header-bg-dark px-2 py-2">
-          <ChatSidebarMobile onSelectChat={(id) => console.log("Open chat:", id)} />
+        <ChatSidebarMobile onSelectChat={(id) => console.log("Open chat:", id)} /> 
         </div>
       ) : (
         <ShellHeaderDesktop
@@ -115,7 +117,7 @@ export const Shell: React.FC = React.memo(() => {
         {/* Desktop sidebar */}
         {!isMobile && (
           <div className="hidden md:flex md:w-2/12 lg:w-2/12 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700">
-            {MemoizedSidebar}
+             {MemoizedSidebar}
           </div>
         )}
 
@@ -128,15 +130,16 @@ export const Shell: React.FC = React.memo(() => {
       </div>
 
       {/* Footer */}
-      <footer
-        className={`
-          flex-none py-4 text-center text-xs border-t 
-          border-header-border bg-header-bg/70 text-footer-text 
-          dark:border-header-border-dark dark:bg-header-bg-dark/70 dark:text-footer-text-dark
-        `}
-      >
-        © {new Date().getFullYear()} Ktulhu-Project
-      </footer>
+<footer
+  className={`
+    flex-none py-2 sm:py-4 text-center text-xs border-t 
+    border-header-border bg-header-bg/70 text-footer-text 
+    dark:border-header-border-dark dark:bg-header-bg-dark/70 dark:text-footer-text-dark
+  `}
+>
+  © {new Date().getFullYear()} Ktulhu-Project
+</footer>
+
     </div>
   );
 });
