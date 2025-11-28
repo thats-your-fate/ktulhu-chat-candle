@@ -97,7 +97,7 @@ function makeWsUrl(baseUrl: string): string {
   const envWs = (import.meta as any)?.env?.VITE_WEB_SOCK_BASE_URL as string | undefined;
   const raw = envWs && envWs.trim()
     ? normalizeBaseUrl(envWs)
-    : `${normalizeBaseUrl(baseUrl)}/chat-summary/ws`;
+    : `${normalizeBaseUrl(baseUrl)}/ws`;
 
   return normalizeToWs(raw);
 }
@@ -365,7 +365,7 @@ export function useChatSummaries({
 
       wsRef.current = ws;
 
-      ws.onopen = () => console.log(" Connected to /chat-summary/ws");
+      ws.onopen = () => console.log(" Connected to /ws");
 
       ws.onmessage = (event) => {
         try {
