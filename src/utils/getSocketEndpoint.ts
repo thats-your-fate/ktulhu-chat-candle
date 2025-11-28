@@ -5,7 +5,7 @@
 export function getSocketEndpoint(): string {
 
 
-  return normalizeToWs("https://backend.ktulhu.com/ws/");
+  return normalizeToWs("https://backend.ktulhu.com/ws");
 }
 
 /** Convert http/https → ws/wss */
