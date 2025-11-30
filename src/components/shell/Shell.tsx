@@ -14,16 +14,18 @@ export const Shell: React.FC = React.memo(() => {
   const [endpoint, setEndpoint] = useState(getSocketEndpoint());
   const isMobile = useIsMobile(768);
   const [mobileViewportHeight, setMobileViewportHeight] = useState<number | null>(null);
+  const [maxViewportHeight, setMaxViewportHeight] = useState<number | null>(null);
   const [mobileViewportOffset, setMobileViewportOffset] = useState(0);
   const isiOS =
     typeof navigator !== "undefined" && /iPad|iPhone|iPod/.test(navigator.userAgent);
   const keyboardOffset =
     isiOS && mobileViewportOffset > 0 ? mobileViewportOffset : 0;
-  const computedHeight = isMobile
-    ? mobileViewportHeight
-      ? `${mobileViewportHeight + keyboardOffset}px`
-      : "100dvh"
-    : "100vh";
+  const keyboardVisible =
+    isMobile &&
+    mobileViewportHeight !== null &&
+    maxViewportHeight !== null &&
+    maxViewportHeight - mobileViewportHeight > 120;
+  const verticalOffset = keyboardVisible ? 0 : keyboardOffset;
 
   // Track the visible viewport height on mobile so the shell shrinks when
   // the browser UI or keyboard covers part of the screen.
@@ -40,6 +42,9 @@ export const Shell: React.FC = React.memo(() => {
       const nextHeight = viewport?.height ?? window.innerHeight;
       setMobileViewportHeight(Math.round(nextHeight));
       setMobileViewportOffset(Math.round(viewport?.offsetTop ?? 0));
+      setMaxViewportHeight((prev) =>
+        prev === null ? Math.round(nextHeight) : Math.max(prev, Math.round(nextHeight))
+      );
     };
 
     updateHeight();
@@ -138,11 +143,15 @@ export const Shell: React.FC = React.memo(() => {
         dark:bg-app-bg-dark dark:text-app-text-dark
       `}
       style={{
-        height: computedHeight,
+        height: isMobile
+          ? mobileViewportHeight
+            ? `${mobileViewportHeight}px`
+            : "100dvh"
+          : "100vh",
         paddingBottom: isiOS
           ? "env(safe-area-inset-bottom, 0px)"
           : undefined,
-        marginTop: keyboardOffset ? -keyboardOffset : undefined,
+        marginTop: verticalOffset ? -verticalOffset : undefined,
       }}
     >
       {/* Header */}
