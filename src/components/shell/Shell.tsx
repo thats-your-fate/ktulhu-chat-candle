@@ -13,129 +13,6 @@ export const Shell: React.FC = React.memo(() => {
   const location = useLocation();
   const [endpoint, setEndpoint] = useState(getSocketEndpoint());
   const isMobile = useIsMobile(768);
-  const [bottomNavInset, setBottomNavInset] = useState(0);
-  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
-  const isAndroid =
-    typeof navigator !== "undefined" && /Android/i.test(navigator.userAgent);
-
-  // Track input focus to know when the on-screen keyboard is visible
-  useEffect(() => {
-    if (!isMobile || typeof document === "undefined") return;
-
-    const isEditable = (target: EventTarget | null): target is HTMLElement => {
-      if (!(target instanceof HTMLElement)) return false;
-      if (target.isContentEditable) return true;
-      if (target.tagName === "TEXTAREA") return true;
-      if (target.tagName === "INPUT") {
-        const type = (target as HTMLInputElement).type;
-        return !["button", "checkbox", "radio", "submit", "reset"].includes(
-          type
-        );
-      }
-      return false;
-    };
-
-    let keyboardCloseTimer: ReturnType<typeof setTimeout> | null = null;
-
-    const handleFocusIn = (event: FocusEvent) => {
-      if (isEditable(event.target)) {
-        if (keyboardCloseTimer) {
-          clearTimeout(keyboardCloseTimer);
-          keyboardCloseTimer = null;
-        }
-        setIsKeyboardOpen(true);
-      }
-    };
-
-    const handleFocusOut = (event: FocusEvent) => {
-      if (isEditable(event.target)) {
-        // Delay to avoid flicker when switching between inputs
-        keyboardCloseTimer = window.setTimeout(() => {
-          setIsKeyboardOpen(false);
-        }, 100);
-      }
-    };
-
-    document.addEventListener("focusin", handleFocusIn);
-    document.addEventListener("focusout", handleFocusOut);
-
-    return () => {
-      document.removeEventListener("focusin", handleFocusIn);
-      document.removeEventListener("focusout", handleFocusOut);
-      if (keyboardCloseTimer) {
-        clearTimeout(keyboardCloseTimer);
-      }
-    };
-  }, [isMobile]);
-
-  // Track the size of the browser chrome that overlays the bottom of the viewport
-  useEffect(() => {
-    if (!isMobile || typeof window === "undefined") {
-      setBottomNavInset(0);
-      return;
-    }
-
-    const KEYBOARD_THRESHOLD = 180; // avoid treating soft keyboards as nav bars
-
-    const computeInset = () => {
-      const viewport = window.visualViewport;
-
-      if (viewport) {
-        const visualInset = Math.max(
-          0,
-          window.innerHeight - (viewport.height + viewport.offsetTop)
-        );
-
-        if (visualInset > 0) {
-          return visualInset;
-        }
-      }
-
-      if (
-        typeof window.outerHeight === "number" &&
-        window.outerHeight > window.innerHeight
-      ) {
-        return window.outerHeight - window.innerHeight;
-      }
-
-      if (window.screen?.height) {
-        return Math.max(0, window.screen.height - window.innerHeight);
-      }
-
-      return 0;
-    };
-
-    const updateInset = () => {
-      const measured = Math.round(computeInset());
-      const navFromScreenAvail =
-        isAndroid && window.screen
-          ? Math.max(
-              0,
-              (window.screen.height || 0) - (window.screen.availHeight || 0)
-            )
-          : 0;
-      const baseInset = measured > 0 ? measured : navFromScreenAvail;
-      const inset =
-        isKeyboardOpen && measured > KEYBOARD_THRESHOLD ? 0 : baseInset;
-
-      setBottomNavInset((prev) => (prev === inset ? prev : inset));
-    };
-
-    updateInset();
-
-    const viewport = window.visualViewport;
-    viewport?.addEventListener("resize", updateInset);
-    viewport?.addEventListener("scroll", updateInset);
-    window.addEventListener("resize", updateInset);
-    window.addEventListener("orientationchange", updateInset);
-
-    return () => {
-      viewport?.removeEventListener("resize", updateInset);
-      viewport?.removeEventListener("scroll", updateInset);
-      window.removeEventListener("resize", updateInset);
-      window.removeEventListener("orientationchange", updateInset);
-    };
-  }, [isMobile, isKeyboardOpen, isAndroid]);
 
   /* --------------------------------------------------------
       THEME (reactive + persistent)
@@ -220,9 +97,6 @@ export const Shell: React.FC = React.memo(() => {
       `}
       style={{
         height: isMobile ? "100dvh" : "100vh",
-        paddingBottom: isMobile
-          ? `calc(${bottomNavInset}px + env(safe-area-inset-bottom, 0px))`
-          : undefined,
       }}
     >
       {/* Header */}
@@ -251,9 +125,11 @@ export const Shell: React.FC = React.memo(() => {
         )}
 
         {/* Main content */}
-        <main className="flex-1 overflow-hidden flex flex-col">
-          <Container>
-            <Outlet /> {/* Routes render here */}
+        <main className="flex-1 overflow-hidden flex flex-col min-h-0">
+          <Container className="flex flex-col flex-1 min-h-0 h-full overflow-hidden">
+            <div className="flex-1 min-h-0 flex flex-col">
+              <Outlet /> {/* Routes render here */}
+            </div>
           </Container>
         </main>
       </div>
