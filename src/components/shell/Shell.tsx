@@ -219,6 +219,7 @@ export const Shell: React.FC = React.memo(() => {
         dark:bg-app-bg-dark dark:text-app-text-dark
       `}
       style={{
+        height: isMobile ? "100dvh" : "100vh",
         paddingBottom: isMobile
           ? `calc(${bottomNavInset}px + env(safe-area-inset-bottom, 0px))`
           : undefined,
