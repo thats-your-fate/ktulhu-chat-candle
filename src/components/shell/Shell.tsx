@@ -14,6 +14,59 @@ export const Shell: React.FC = React.memo(() => {
   const [endpoint, setEndpoint] = useState(getSocketEndpoint());
   const isMobile = useIsMobile(768);
   const [bottomNavInset, setBottomNavInset] = useState(0);
+  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
+  const isAndroid =
+    typeof navigator !== "undefined" && /Android/i.test(navigator.userAgent);
+
+  // Track input focus to know when the on-screen keyboard is visible
+  useEffect(() => {
+    if (!isMobile || typeof document === "undefined") return;
+
+    const isEditable = (target: EventTarget | null): target is HTMLElement => {
+      if (!(target instanceof HTMLElement)) return false;
+      if (target.isContentEditable) return true;
+      if (target.tagName === "TEXTAREA") return true;
+      if (target.tagName === "INPUT") {
+        const type = (target as HTMLInputElement).type;
+        return !["button", "checkbox", "radio", "submit", "reset"].includes(
+          type
+        );
+      }
+      return false;
+    };
+
+    let keyboardCloseTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const handleFocusIn = (event: FocusEvent) => {
+      if (isEditable(event.target)) {
+        if (keyboardCloseTimer) {
+          clearTimeout(keyboardCloseTimer);
+          keyboardCloseTimer = null;
+        }
+        setIsKeyboardOpen(true);
+      }
+    };
+
+    const handleFocusOut = (event: FocusEvent) => {
+      if (isEditable(event.target)) {
+        // Delay to avoid flicker when switching between inputs
+        keyboardCloseTimer = window.setTimeout(() => {
+          setIsKeyboardOpen(false);
+        }, 100);
+      }
+    };
+
+    document.addEventListener("focusin", handleFocusIn);
+    document.addEventListener("focusout", handleFocusOut);
+
+    return () => {
+      document.removeEventListener("focusin", handleFocusIn);
+      document.removeEventListener("focusout", handleFocusOut);
+      if (keyboardCloseTimer) {
+        clearTimeout(keyboardCloseTimer);
+      }
+    };
+  }, [isMobile]);
 
   // Track the size of the browser chrome that overlays the bottom of the viewport
   useEffect(() => {
@@ -54,7 +107,16 @@ export const Shell: React.FC = React.memo(() => {
 
     const updateInset = () => {
       const measured = Math.round(computeInset());
-      const inset = measured > KEYBOARD_THRESHOLD ? 0 : measured;
+      const navFromScreenAvail =
+        isAndroid && window.screen
+          ? Math.max(
+              0,
+              (window.screen.height || 0) - (window.screen.availHeight || 0)
+            )
+          : 0;
+      const baseInset = measured > 0 ? measured : navFromScreenAvail;
+      const inset =
+        isKeyboardOpen && measured > KEYBOARD_THRESHOLD ? 0 : baseInset;
 
       setBottomNavInset((prev) => (prev === inset ? prev : inset));
     };
@@ -73,7 +135,7 @@ export const Shell: React.FC = React.memo(() => {
       window.removeEventListener("resize", updateInset);
       window.removeEventListener("orientationchange", updateInset);
     };
-  }, [isMobile]);
+  }, [isMobile, isKeyboardOpen, isAndroid]);
 
   /* --------------------------------------------------------
       THEME (reactive + persistent)
