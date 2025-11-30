@@ -18,9 +18,12 @@ export const Shell: React.FC = React.memo(() => {
   const isiOS =
     typeof navigator !== "undefined" && /iPad|iPhone|iPod/.test(navigator.userAgent);
   const keyboardOffset =
-    isiOS && mobileViewportOffset > 0 && mobileViewportOffset < 120
-      ? mobileViewportOffset
-      : 0;
+    isiOS && mobileViewportOffset > 0 ? mobileViewportOffset : 0;
+  const computedHeight = isMobile
+    ? mobileViewportHeight
+      ? `${mobileViewportHeight + keyboardOffset}px`
+      : "100dvh"
+    : "100vh";
 
   // Track the visible viewport height on mobile so the shell shrinks when
   // the browser UI or keyboard covers part of the screen.
@@ -135,11 +138,7 @@ export const Shell: React.FC = React.memo(() => {
         dark:bg-app-bg-dark dark:text-app-text-dark
       `}
       style={{
-        height: isMobile
-          ? mobileViewportHeight
-            ? `${mobileViewportHeight}px`
-            : "100dvh"
-          : "100vh",
+        height: computedHeight,
         paddingBottom: isiOS
           ? "env(safe-area-inset-bottom, 0px)"
           : undefined,
