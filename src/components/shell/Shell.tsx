@@ -139,10 +139,8 @@ export const Shell: React.FC = React.memo(() => {
         paddingBottom: isiOS
           ? "env(safe-area-inset-bottom, 0px)"
           : undefined,
-        transform:
-          isiOS && mobileViewportOffset > 0
-            ? `translateY(-${mobileViewportOffset}px)`
-            : undefined,
+        marginTop:
+          isiOS && mobileViewportOffset > 0 ? -mobileViewportOffset : undefined,
       }}
     >
       {/* Header */}
