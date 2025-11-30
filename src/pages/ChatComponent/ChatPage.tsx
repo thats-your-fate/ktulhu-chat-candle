@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 import { Container } from "../../components/ui/Container";
@@ -33,6 +33,11 @@ export default function ChatComponent() {
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
   const { sendPrompt, addHandlers } = useSocketContext();
+  // Mobile Safari glitches when the keyboard appears if the composer uses backdrop blur.
+  const isiOS = useMemo(() => {
+    if (typeof navigator === "undefined") return false;
+    return /iPad|iPhone|iPod/.test(navigator.userAgent);
+  }, []);
 
   /** Active assistant message ID */
   const assistantIdRef = useRef<string | null>(null);
@@ -176,7 +181,13 @@ export default function ChatComponent() {
           <SystemStatusBanner text={liveStatus ?? null} />
         </PannelBody>
 
-        <div className="absolute bottom-0 left-0 right-0 backdrop-blur-sm border-t px-4 py-3">
+        <div
+          className={`absolute bottom-0 left-0 right-0 border-t px-4 py-3 ${
+            isiOS
+              ? "bg-header-bg/95 dark:bg-header-bg-dark/95"
+              : "backdrop-blur-sm bg-header-bg/70 dark:bg-header-bg-dark/70"
+          }`}
+        >
           <InputArea
             value={input}
             onChange={setInput}
