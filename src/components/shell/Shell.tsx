@@ -15,38 +15,63 @@ export const Shell: React.FC = React.memo(() => {
   const isMobile = useIsMobile(768);
   const [bottomNavInset, setBottomNavInset] = useState(0);
 
-  // Ensure content is not obscured by the mobile browser bottom chrome
+  // Track the size of the browser chrome that overlays the bottom of the viewport
   useEffect(() => {
     if (!isMobile || typeof window === "undefined") {
       setBottomNavInset(0);
       return;
     }
 
-    const viewport = window.visualViewport;
-    if (!viewport) {
-      setBottomNavInset(0);
-      return;
-    }
+    const KEYBOARD_THRESHOLD = 180; // avoid treating soft keyboards as nav bars
+
+    const computeInset = () => {
+      const viewport = window.visualViewport;
+
+      if (viewport) {
+        const visualInset = Math.max(
+          0,
+          window.innerHeight - (viewport.height + viewport.offsetTop)
+        );
+
+        if (visualInset > 0) {
+          return visualInset;
+        }
+      }
+
+      if (
+        typeof window.outerHeight === "number" &&
+        window.outerHeight > window.innerHeight
+      ) {
+        return window.outerHeight - window.innerHeight;
+      }
+
+      if (window.screen?.height) {
+        return Math.max(0, window.screen.height - window.innerHeight);
+      }
+
+      return 0;
+    };
 
     const updateInset = () => {
-      const inset = Math.max(
-        0,
-        window.innerHeight - (viewport.height + viewport.offsetTop)
-      );
+      const measured = Math.round(computeInset());
+      const inset = measured > KEYBOARD_THRESHOLD ? 0 : measured;
 
-      setBottomNavInset((prev) => {
-        const next = Math.round(inset);
-        return prev === next ? prev : next;
-      });
+      setBottomNavInset((prev) => (prev === inset ? prev : inset));
     };
 
     updateInset();
-    viewport.addEventListener("resize", updateInset);
-    viewport.addEventListener("scroll", updateInset);
+
+    const viewport = window.visualViewport;
+    viewport?.addEventListener("resize", updateInset);
+    viewport?.addEventListener("scroll", updateInset);
+    window.addEventListener("resize", updateInset);
+    window.addEventListener("orientationchange", updateInset);
 
     return () => {
-      viewport.removeEventListener("resize", updateInset);
-      viewport.removeEventListener("scroll", updateInset);
+      viewport?.removeEventListener("resize", updateInset);
+      viewport?.removeEventListener("scroll", updateInset);
+      window.removeEventListener("resize", updateInset);
+      window.removeEventListener("orientationchange", updateInset);
     };
   }, [isMobile]);
 
@@ -131,7 +156,11 @@ export const Shell: React.FC = React.memo(() => {
         bg-app-bg text-app-text
         dark:bg-app-bg-dark dark:text-app-text-dark
       `}
-      style={{ paddingBottom: isMobile ? bottomNavInset : undefined }}
+      style={{
+        paddingBottom: isMobile
+          ? `calc(${bottomNavInset}px + env(safe-area-inset-bottom, 0px))`
+          : undefined,
+      }}
     >
       {/* Header */}
       {isMobile ? (
