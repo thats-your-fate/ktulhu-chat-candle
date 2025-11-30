@@ -120,6 +120,11 @@ export const Shell: React.FC = React.memo(() => {
     []
   );
 
+  const statusBarOffset =
+    isiOS && mobileViewportOffset > 0 && mobileViewportOffset < 120
+      ? mobileViewportOffset
+      : 0;
+
   /* --------------------------------------------------------
       Layout
   -------------------------------------------------------- */
@@ -139,8 +144,7 @@ export const Shell: React.FC = React.memo(() => {
         paddingBottom: isiOS
           ? "env(safe-area-inset-bottom, 0px)"
           : undefined,
-        marginTop:
-          isiOS && mobileViewportOffset > 0 ? -mobileViewportOffset : undefined,
+        marginTop: statusBarOffset ? -statusBarOffset : undefined,
       }}
     >
       {/* Header */}
