@@ -13,6 +13,42 @@ export const Shell: React.FC = React.memo(() => {
   const location = useLocation();
   const [endpoint, setEndpoint] = useState(getSocketEndpoint());
   const isMobile = useIsMobile(768);
+  const [bottomNavInset, setBottomNavInset] = useState(0);
+
+  // Ensure content is not obscured by the mobile browser bottom chrome
+  useEffect(() => {
+    if (!isMobile || typeof window === "undefined") {
+      setBottomNavInset(0);
+      return;
+    }
+
+    const viewport = window.visualViewport;
+    if (!viewport) {
+      setBottomNavInset(0);
+      return;
+    }
+
+    const updateInset = () => {
+      const inset = Math.max(
+        0,
+        window.innerHeight - (viewport.height + viewport.offsetTop)
+      );
+
+      setBottomNavInset((prev) => {
+        const next = Math.round(inset);
+        return prev === next ? prev : next;
+      });
+    };
+
+    updateInset();
+    viewport.addEventListener("resize", updateInset);
+    viewport.addEventListener("scroll", updateInset);
+
+    return () => {
+      viewport.removeEventListener("resize", updateInset);
+      viewport.removeEventListener("scroll", updateInset);
+    };
+  }, [isMobile]);
 
   /* --------------------------------------------------------
       THEME (reactive + persistent)
@@ -91,10 +127,11 @@ export const Shell: React.FC = React.memo(() => {
   return (
     <div
       className={`
-        flex flex-col h-screen overflow-hidden
+        flex flex-col h-screen overflow-hidden box-border
         bg-app-bg text-app-text
         dark:bg-app-bg-dark dark:text-app-text-dark
       `}
+      style={{ paddingBottom: isMobile ? bottomNavInset : undefined }}
     >
       {/* Header */}
       {isMobile ? (
