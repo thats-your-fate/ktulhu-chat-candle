@@ -13,6 +13,36 @@ export const Shell: React.FC = React.memo(() => {
   const location = useLocation();
   const [endpoint, setEndpoint] = useState(getSocketEndpoint());
   const isMobile = useIsMobile(768);
+  const [mobileViewportHeight, setMobileViewportHeight] = useState<number | null>(null);
+
+  // Track the visible viewport height on mobile so the shell shrinks when
+  // the browser UI or keyboard covers part of the screen.
+  useEffect(() => {
+    if (!isMobile || typeof window === "undefined") {
+      setMobileViewportHeight(null);
+      return;
+    }
+
+    const viewport = window.visualViewport;
+
+    const updateHeight = () => {
+      const nextHeight = viewport?.height ?? window.innerHeight;
+      setMobileViewportHeight(Math.round(nextHeight));
+    };
+
+    updateHeight();
+    viewport?.addEventListener("resize", updateHeight);
+    viewport?.addEventListener("scroll", updateHeight);
+    window.addEventListener("resize", updateHeight);
+    window.addEventListener("orientationchange", updateHeight);
+
+    return () => {
+      viewport?.removeEventListener("resize", updateHeight);
+      viewport?.removeEventListener("scroll", updateHeight);
+      window.removeEventListener("resize", updateHeight);
+      window.removeEventListener("orientationchange", updateHeight);
+    };
+  }, [isMobile]);
 
   /* --------------------------------------------------------
       THEME (reactive + persistent)
@@ -96,7 +126,11 @@ export const Shell: React.FC = React.memo(() => {
         dark:bg-app-bg-dark dark:text-app-text-dark
       `}
       style={{
-        height: isMobile ? "100dvh" : "100vh",
+        height: isMobile
+          ? mobileViewportHeight
+            ? `${mobileViewportHeight}px`
+            : "100dvh"
+          : "100vh",
       }}
     >
       {/* Header */}
