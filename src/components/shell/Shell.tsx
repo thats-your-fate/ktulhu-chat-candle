@@ -198,7 +198,7 @@ export const Shell: React.FC = React.memo(() => {
       {/* Footer */}
 <footer
   className={`
-    flex-none py-2 sm:py-4 text-center text-xs border-t 
+    flex-none py-2 pb-8 sm:py-4 sm:pb-2 text-center text-xs border-t 
     border-header-border bg-header-bg/70 text-footer-text 
     dark:border-header-border-dark dark:bg-header-bg-dark/70 dark:text-footer-text-dark
   `}
