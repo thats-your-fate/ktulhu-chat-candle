@@ -14,6 +14,8 @@ export const Shell: React.FC = React.memo(() => {
   const [endpoint, setEndpoint] = useState(getSocketEndpoint());
   const isMobile = useIsMobile(768);
   const [mobileViewportHeight, setMobileViewportHeight] = useState<number | null>(null);
+  const isiOS =
+    typeof navigator !== "undefined" && /iPad|iPhone|iPod/.test(navigator.userAgent);
 
   // Track the visible viewport height on mobile so the shell shrinks when
   // the browser UI or keyboard covers part of the screen.
@@ -131,6 +133,9 @@ export const Shell: React.FC = React.memo(() => {
             ? `${mobileViewportHeight}px`
             : "100dvh"
           : "100vh",
+        paddingBottom: isiOS
+          ? "env(safe-area-inset-bottom, 0px)"
+          : undefined,
       }}
     >
       {/* Header */}
