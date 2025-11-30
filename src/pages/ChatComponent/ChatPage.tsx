@@ -165,8 +165,8 @@ export default function ChatComponent() {
   /*  UI                                                    */
   /* ------------------------------------------------------ */
   return (
-    <Container className="h-[calc(100vh-6rem)] flex justify-center">
-      <Pannel className="flex flex-col w-full h-full relative overflow-hidden">
+    <Container className="flex flex-1 h-full min-h-0 justify-center">
+      <Pannel className="flex flex-col w-full h-full min-h-0 relative overflow-hidden">
         <PannelBody
           ref={scrollRef as any}
           className="flex-1 overflow-y-auto pb-[120px] relative"
