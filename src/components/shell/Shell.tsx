@@ -14,6 +14,7 @@ export const Shell: React.FC = React.memo(() => {
   const [endpoint, setEndpoint] = useState(getSocketEndpoint());
   const isMobile = useIsMobile(768);
   const [mobileViewportHeight, setMobileViewportHeight] = useState<number | null>(null);
+  const [mobileViewportOffset, setMobileViewportOffset] = useState(0);
   const isiOS =
     typeof navigator !== "undefined" && /iPad|iPhone|iPod/.test(navigator.userAgent);
 
@@ -22,6 +23,7 @@ export const Shell: React.FC = React.memo(() => {
   useEffect(() => {
     if (!isMobile || typeof window === "undefined") {
       setMobileViewportHeight(null);
+      setMobileViewportOffset(0);
       return;
     }
 
@@ -30,6 +32,7 @@ export const Shell: React.FC = React.memo(() => {
     const updateHeight = () => {
       const nextHeight = viewport?.height ?? window.innerHeight;
       setMobileViewportHeight(Math.round(nextHeight));
+      setMobileViewportOffset(Math.round(viewport?.offsetTop ?? 0));
     };
 
     updateHeight();
@@ -136,6 +139,10 @@ export const Shell: React.FC = React.memo(() => {
         paddingBottom: isiOS
           ? "env(safe-area-inset-bottom, 0px)"
           : undefined,
+        transform:
+          isiOS && mobileViewportOffset > 0
+            ? `translateY(-${mobileViewportOffset}px)`
+            : undefined,
       }}
     >
       {/* Header */}
@@ -165,7 +172,7 @@ export const Shell: React.FC = React.memo(() => {
 
         {/* Main content */}
         <main className="flex-1 overflow-hidden flex flex-col min-h-0">
-          <Container className="flex flex-col flex-1 min-h-0 h-full overflow-hidden">
+          <Container className="flex flex-col flex-1 min-h-0 overflow-hidden">
             <div className="flex-1 min-h-0 flex flex-col">
               <Outlet /> {/* Routes render here */}
             </div>
