@@ -154,7 +154,9 @@ export const Shell: React.FC = React.memo(() => {
             : "100dvh"
           : "100vh",
         paddingBottom: isiOS
-          ? "env(safe-area-inset-bottom, 0px)"
+          ? keyboardVisible
+            ? 0
+            : "env(safe-area-inset-bottom, 0px)"
           : undefined,
         marginTop: verticalOffset ? -verticalOffset : undefined,
       }}
