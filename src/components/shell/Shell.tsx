@@ -66,6 +66,30 @@ export const Shell: React.FC = React.memo(() => {
     };
   }, [isMobile]);
 
+  // Keep the document viewport height in sync with the visible viewport so the
+  // body/root don't leave extra space below the keyboard.
+  useEffect(() => {
+    if (typeof document === "undefined") {
+      return;
+    }
+
+    const root = document.documentElement;
+    if (!isMobile) {
+      root.style.removeProperty("--app-viewport-height");
+      return;
+    }
+
+    const nextHeight = mobileViewportHeight
+      ? `${mobileViewportHeight}px`
+      : "100dvh";
+
+    root.style.setProperty("--app-viewport-height", nextHeight);
+
+    return () => {
+      root.style.removeProperty("--app-viewport-height");
+    };
+  }, [isMobile, mobileViewportHeight]);
+
   /* --------------------------------------------------------
       THEME (reactive + persistent)
   -------------------------------------------------------- */
