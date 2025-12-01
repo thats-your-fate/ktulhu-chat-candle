@@ -30,6 +30,14 @@ export const Shell: React.FC = React.memo(() => {
   const keyboardVisible =
     isMobile &&
     (keyboardHeightReduced || (isiOS && mobileViewportOffset > KEYBOARD_THRESHOLD));
+  // Amount of layout viewport hidden by the keyboard. Used to extend the shell downwards so
+  // the background still covers space behind the keyboard when it slides in.
+  const keyboardFillHeight =
+    keyboardVisible &&
+    mobileViewportHeight !== null &&
+    maxViewportHeight !== null
+      ? Math.max(0, maxViewportHeight - mobileViewportHeight)
+      : 0;
   const verticalOffset = keyboardVisible ? 0 : keyboardOffset;
 
   // Track the visible viewport height on mobile so the shell shrinks when
@@ -183,6 +191,7 @@ export const Shell: React.FC = React.memo(() => {
             : "env(safe-area-inset-bottom, 0px)"
           : undefined,
         marginTop: verticalOffset ? -verticalOffset : undefined,
+        marginBottom: keyboardFillHeight ? `-${keyboardFillHeight}px` : undefined,
       }}
     >
       {/* Header */}
