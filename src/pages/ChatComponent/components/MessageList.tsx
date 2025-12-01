@@ -44,7 +44,7 @@ export const MessageList: React.FC<MessageListProps> = ({ history, loading = fal
   </p>
 
   <p className="text-xl text-gray-500 dark:text-gray-400 opacity-80">
-    Ask Ktulhu AI Chat.
+    Ask Ktulhu AI.
   </p>
 </div>
 
