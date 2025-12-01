@@ -18,13 +18,18 @@ export const Shell: React.FC = React.memo(() => {
   const [mobileViewportOffset, setMobileViewportOffset] = useState(0);
   const isiOS =
     typeof navigator !== "undefined" && /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const KEYBOARD_THRESHOLD = 120;
   const keyboardOffset =
     isiOS && mobileViewportOffset > 0 ? mobileViewportOffset : 0;
-  const keyboardVisible =
-    isMobile &&
+  const keyboardHeightReduced =
     mobileViewportHeight !== null &&
     maxViewportHeight !== null &&
-    maxViewportHeight - mobileViewportHeight > 120;
+    maxViewportHeight - mobileViewportHeight > KEYBOARD_THRESHOLD;
+  // Some iOS versions just offset the viewport when the keyboard opens, so we also
+  // treat a large top offset as a keyboard signal to avoid exposing the white body background.
+  const keyboardVisible =
+    isMobile &&
+    (keyboardHeightReduced || (isiOS && mobileViewportOffset > KEYBOARD_THRESHOLD));
   const verticalOffset = keyboardVisible ? 0 : keyboardOffset;
 
   // Track the visible viewport height on mobile so the shell shrinks when
