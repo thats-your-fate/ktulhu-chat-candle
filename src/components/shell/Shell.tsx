@@ -199,16 +199,23 @@ export const Shell: React.FC = React.memo(() => {
         bg-app-bg text-app-text
         dark:bg-app-bg-dark dark:text-app-text-dark
       `}
-      style={{
-        height: isMobile
-          ? mobileViewportHeight
-            ? `${mobileViewportHeight}px`
-            : "100dvh"
-          : "100vh",
-paddingBottom: isiOS ? "env(safe-area-inset-bottom)" : undefined,
-        marginTop: verticalOffset ? -verticalOffset : undefined,
-        marginBottom: keyboardFillHeight ? `-${keyboardFillHeight}px` : undefined,
-      }}
+style={{
+  height: isMobile
+    ? mobileViewportHeight
+      ? `${mobileViewportHeight}px`
+      : "100dvh"
+    : "100vh",
+
+  // don't override paddingBottom based on safe area during keyboard
+  paddingBottom: keyboardVisible
+    ? `${keyboardFillHeight}px`
+    : isiOS
+    ? "env(safe-area-inset-bottom)"
+    : 0,
+
+  marginTop: verticalOffset ? -verticalOffset : undefined,
+}}
+
     >
       {/* Header */}
       {isMobile ? (
