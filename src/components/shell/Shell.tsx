@@ -31,6 +31,7 @@ export const Shell: React.FC = React.memo(() => {
     isMobile &&
     (keyboardHeightReduced || (isiOS && mobileViewportOffset > KEYBOARD_THRESHOLD));
   const verticalOffset = keyboardVisible ? 0 : keyboardOffset;
+  const showIosFooter = !(isiOS && keyboardVisible);
 
   // Track the visible viewport height on mobile so the shell shrinks when
   // the browser UI or keyboard covers part of the screen.
@@ -197,15 +198,17 @@ export const Shell: React.FC = React.memo(() => {
       </div>
 
       {/* Footer */}
-<footer
-  className={`
+      {showIosFooter && (
+        <footer
+          className={`
     flex-none py-2 sm:py-4 text-center text-xs border-t 
     border-header-border bg-header-bg/70 text-footer-text 
     dark:border-header-border-dark dark:bg-header-bg-dark/70 dark:text-footer-text-dark
   `}
->
-  © {new Date().getFullYear()} Ktulhu-Project
-</footer>
+        >
+          © {new Date().getFullYear()} Ktulhu-Project
+        </footer>
+      )}
 
     </div>
   );
