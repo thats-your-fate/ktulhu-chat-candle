@@ -3,6 +3,14 @@ import type { ChatSummary } from "../../hooks/useChatSummaries";
 import { MoreHorizontal } from "lucide-react";
 import clsx from "clsx";
 
+const truncateSummary = (text: string, maxWords = 3) => {
+  const words = text.split(/\s+/).filter(Boolean);
+  if (words.length <= maxWords) {
+    return text;
+  }
+  return `${words.slice(0, maxWords).join(" ")}...`;
+};
+
 interface ChatListItemProps {
   chat: ChatSummary;
   onSelect: (chatId: string) => void;
@@ -18,7 +26,9 @@ export const ChatListItem: React.FC<ChatListItemProps> = ({
 }) => {
   const chatId = chat.chat_id ?? "unknown";
   const shortId = chatId.length > 8 ? chatId.slice(0, 8) : chatId;
-  const title = chat.summary?.trim() || `Chat ${shortId}`;
+  const summary = chat.summary?.trim();
+  const fallbackTitle = `Chat ${shortId}`;
+  const title = summary ? truncateSummary(summary) : fallbackTitle;
 
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
