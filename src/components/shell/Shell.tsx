@@ -107,16 +107,21 @@ export const Shell: React.FC = React.memo(() => {
       return;
     }
 
-    const nextHeight = mobileViewportHeight
-      ? `${mobileViewportHeight}px`
-      : "100dvh";
+    // When iOS keyboard is visible we keep the CSS viewport height locked to the pre-keyboard
+    // maximum so Safari paints behind the keyboard instead of revealing white.
+    const nextHeight =
+      isiOS && keyboardVisible && maxViewportHeight
+        ? `${maxViewportHeight}px`
+        : mobileViewportHeight
+        ? `${mobileViewportHeight}px`
+        : "100dvh";
 
     root.style.setProperty("--app-viewport-height", nextHeight);
 
     return () => {
       root.style.removeProperty("--app-viewport-height");
     };
-  }, [isMobile, mobileViewportHeight]);
+  }, [isMobile, isiOS, keyboardVisible, mobileViewportHeight, maxViewportHeight]);
 
   /* --------------------------------------------------------
       THEME (reactive + persistent)
