@@ -42,22 +42,22 @@ export const Shell: React.FC = React.memo(() => {
 
 
   useEffect(() => {
-  const root = document.documentElement;
-  const body = document.body;
+    const root = document.documentElement;
+    const body = document.body;
 
-  if (keyboardVisible) {
-    root.classList.add("keyboard-lock");
-    body.classList.add("keyboard-lock");
-  } else {
-    root.classList.remove("keyboard-lock");
-    body.classList.remove("keyboard-lock");
-  }
+    if (keyboardVisible) {
+      root.classList.add("keyboard-lock");
+      body.classList.add("keyboard-lock");
+    } else {
+      root.classList.remove("keyboard-lock");
+      body.classList.remove("keyboard-lock");
+    }
 
-  return () => {
-    root.classList.remove("keyboard-lock");
-    body.classList.remove("keyboard-lock");
-  };
-}, [keyboardVisible]);
+    return () => {
+      root.classList.remove("keyboard-lock");
+      body.classList.remove("keyboard-lock");
+    };
+  }, [keyboardVisible]);
 
 
   // Track the visible viewport height on mobile so the shell shrinks when
@@ -205,13 +205,12 @@ export const Shell: React.FC = React.memo(() => {
             ? `${mobileViewportHeight}px`
             : "100dvh"
           : "100vh",
-        paddingBottom: isiOS
-          ? keyboardVisible
-            ? 0
-            : "env(safe-area-inset-bottom, 0px)"
-          : undefined,
+        paddingBottom: keyboardVisible
+          ? `${keyboardFillHeight}px`
+          : isiOS
+          ? "env(safe-area-inset-bottom, 0px)"
+          : 0,
         marginTop: verticalOffset ? -verticalOffset : undefined,
-        marginBottom: keyboardFillHeight ? `-${keyboardFillHeight}px` : undefined,
       }}
     >
       {/* Header */}
