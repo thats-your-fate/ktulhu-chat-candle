@@ -45,15 +45,6 @@ body.keyboard-lock {
   touch-action: none;
 }
 
-html.ios-scroll,
-body.ios-scroll {
-  position: relative;
-  overflow: auto !important;
-  min-height: 100vh;
-  height: auto;
-  touch-action: auto;
-}
-
 
 .hljs {
   background: #0f172a;
