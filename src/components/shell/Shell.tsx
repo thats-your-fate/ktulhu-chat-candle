@@ -40,6 +40,7 @@ export const Shell: React.FC = React.memo(() => {
       : 0;
   const verticalOffset = keyboardVisible ? 0 : keyboardOffset;
   const keyboardOverlayHeight = isiOS && keyboardVisible ? keyboardFillHeight : 0;
+  const footerFixed = isiOS && keyboardVisible;
 
 
   useEffect(() => {
@@ -258,6 +259,18 @@ export const Shell: React.FC = React.memo(() => {
     border-header-border bg-header-bg/70 text-footer-text 
     dark:border-header-border-dark dark:bg-header-bg-dark/70 dark:text-footer-text-dark
   `}
+        style={
+          footerFixed
+            ? {
+                position: "fixed",
+                left: 0,
+                right: 0,
+                bottom: keyboardOverlayHeight ? `${keyboardOverlayHeight}px` : 0,
+                paddingBottom: "env(safe-area-inset-bottom, 0px)",
+                zIndex: 70,
+              }
+            : undefined
+        }
       >
         © {new Date().getFullYear()} Ktulhu-Project
       </footer>
