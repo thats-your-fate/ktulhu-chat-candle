@@ -39,13 +39,24 @@ export const Shell: React.FC = React.memo(() => {
       ? Math.max(0, maxViewportHeight - mobileViewportHeight)
       : 0;
   const verticalOffset = keyboardVisible ? 0 : keyboardOffset;
-  const keyboardOverlayHeight = isiOS && keyboardVisible ? keyboardFillHeight : 0;
-  const footerFixed = isiOS && keyboardVisible;
-
-
   useEffect(() => {
     const root = document.documentElement;
     const body = document.body;
+
+    if (isiOS) {
+      if (keyboardVisible) {
+        root.classList.add("ios-scroll");
+        body.classList.add("ios-scroll");
+      } else {
+        root.classList.remove("ios-scroll");
+        body.classList.remove("ios-scroll");
+      }
+
+      return () => {
+        root.classList.remove("ios-scroll");
+        body.classList.remove("ios-scroll");
+      };
+    }
 
     if (keyboardVisible) {
       root.classList.add("keyboard-lock");
@@ -59,7 +70,7 @@ export const Shell: React.FC = React.memo(() => {
       root.classList.remove("keyboard-lock");
       body.classList.remove("keyboard-lock");
     };
-  }, [keyboardVisible]);
+  }, [keyboardVisible, isiOS]);
 
 
   // Track the visible viewport height on mobile so the shell shrinks when
@@ -109,21 +120,16 @@ export const Shell: React.FC = React.memo(() => {
       return;
     }
 
-    // When iOS keyboard is visible we keep the CSS viewport height locked to the pre-keyboard
-    // maximum so Safari paints behind the keyboard instead of revealing white.
-    const nextHeight =
-      isiOS && keyboardVisible && maxViewportHeight
-        ? `${maxViewportHeight}px`
-        : mobileViewportHeight
-        ? `${mobileViewportHeight}px`
-        : "100dvh";
+    const nextHeight = mobileViewportHeight
+      ? `${mobileViewportHeight}px`
+      : "100dvh";
 
     root.style.setProperty("--app-viewport-height", nextHeight);
 
     return () => {
       root.style.removeProperty("--app-viewport-height");
     };
-  }, [isMobile, isiOS, keyboardVisible, mobileViewportHeight, maxViewportHeight]);
+  }, [isMobile, mobileViewportHeight]);
 
   /* --------------------------------------------------------
       THEME (reactive + persistent)
@@ -200,8 +206,7 @@ export const Shell: React.FC = React.memo(() => {
       Layout
   -------------------------------------------------------- */
   return (
-    <>
-      <div
+    <div
       className={`
         flex flex-col h-screen overflow-hidden box-border
         bg-app-bg text-app-text
@@ -213,7 +218,11 @@ export const Shell: React.FC = React.memo(() => {
             ? `${mobileViewportHeight}px`
             : "100dvh"
           : "100vh",
-        paddingBottom: isiOS ? "env(safe-area-inset-bottom, 0px)" : 0,
+        paddingBottom: keyboardVisible
+          ? `${keyboardFillHeight}px`
+          : isiOS
+          ? "env(safe-area-inset-bottom, 0px)"
+          : 0,
         marginTop: verticalOffset ? -verticalOffset : undefined,
       }}
     >
@@ -259,33 +268,10 @@ export const Shell: React.FC = React.memo(() => {
     border-header-border bg-header-bg/70 text-footer-text 
     dark:border-header-border-dark dark:bg-header-bg-dark/70 dark:text-footer-text-dark
   `}
-        style={
-          footerFixed
-            ? {
-                position: "fixed",
-                left: 0,
-                right: 0,
-                bottom: keyboardOverlayHeight ? `${keyboardOverlayHeight}px` : 0,
-                paddingBottom: "env(safe-area-inset-bottom, 0px)",
-                zIndex: 70,
-              }
-            : undefined
-        }
       >
         © {new Date().getFullYear()} Ktulhu-Project
       </footer>
 
     </div>
-    <div
-      aria-hidden="true"
-      className="pointer-events-none fixed left-0 right-0 z-[60] transition-[height] duration-150 ease-out"
-      style={{
-        bottom: 0,
-        height: keyboardOverlayHeight ? `${keyboardOverlayHeight}px` : 0,
-        backgroundColor: "var(--color-bg)",
-        opacity: keyboardOverlayHeight ? 1 : 0,
-      }}
-    />
-    </>
   );
 });
