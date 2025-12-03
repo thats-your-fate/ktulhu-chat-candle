@@ -200,6 +200,8 @@ export const Shell: React.FC = React.memo(() => {
         dark:bg-app-bg-dark dark:text-app-text-dark
       `}
       style={{
+        // Use content-box during keyboard lock so padding extends behind the keyboard without shrinking the layout.
+        boxSizing: keyboardVisible ? "content-box" : "border-box",
         height: isMobile
           ? mobileViewportHeight
             ? `${mobileViewportHeight}px`
