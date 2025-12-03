@@ -39,6 +39,7 @@ export const Shell: React.FC = React.memo(() => {
       ? Math.max(0, maxViewportHeight - mobileViewportHeight)
       : 0;
   const verticalOffset = keyboardVisible ? 0 : keyboardOffset;
+  const keyboardOverlayHeight = isiOS && keyboardVisible ? keyboardFillHeight : 0;
 
 
   useEffect(() => {
@@ -198,25 +199,20 @@ export const Shell: React.FC = React.memo(() => {
       Layout
   -------------------------------------------------------- */
   return (
-    <div
+    <>
+      <div
       className={`
         flex flex-col h-screen overflow-hidden box-border
         bg-app-bg text-app-text
         dark:bg-app-bg-dark dark:text-app-text-dark
       `}
       style={{
-        // Use content-box during keyboard lock so padding extends behind the keyboard without shrinking the layout.
-        boxSizing: keyboardVisible ? "content-box" : "border-box",
         height: isMobile
           ? mobileViewportHeight
             ? `${mobileViewportHeight}px`
             : "100dvh"
           : "100vh",
-        paddingBottom: keyboardVisible
-          ? `${keyboardFillHeight}px`
-          : isiOS
-          ? "env(safe-area-inset-bottom, 0px)"
-          : 0,
+        paddingBottom: isiOS ? "env(safe-area-inset-bottom, 0px)" : 0,
         marginTop: verticalOffset ? -verticalOffset : undefined,
       }}
     >
@@ -267,5 +263,16 @@ export const Shell: React.FC = React.memo(() => {
       </footer>
 
     </div>
+    <div
+      aria-hidden="true"
+      className="pointer-events-none fixed left-0 right-0 z-[60] transition-[height] duration-150 ease-out"
+      style={{
+        bottom: 0,
+        height: keyboardOverlayHeight ? `${keyboardOverlayHeight}px` : 0,
+        backgroundColor: "var(--color-bg)",
+        opacity: keyboardOverlayHeight ? 1 : 0,
+      }}
+    />
+    </>
   );
 });
