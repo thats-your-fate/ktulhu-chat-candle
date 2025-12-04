@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useCallback } from "react";
+import React, { useEffect, useMemo, useCallback, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { Container } from "../ui/Container";
 import { ShellHeaderDesktop } from "./ShellHeader";
@@ -13,62 +13,31 @@ export const Shell: React.FC = React.memo(() => {
   const [endpoint, setEndpoint] = useState(getSocketEndpoint());
 
   /* --------------------------------------------------------
-      iOS / Safari-safe viewport height
+      SAFARI-FRIENDLY VIEWPORT HEIGHT
   -------------------------------------------------------- */
-  const [viewportHeight, setViewportHeight] = useState<number>(
-    typeof window !== "undefined" ? window.innerHeight : 800
-  );
+  useEffect(() => {
+    if (typeof window === "undefined") return;
 
-  const [maxViewportHeight, setMaxViewportHeight] = useState<number | null>(null);
+    const viewport = window.visualViewport;
 
-useEffect(() => {
-  if (!isMobile || typeof window === "undefined") return;
+    const updateVh = () => {
+      const vh = (viewport?.height ?? window.innerHeight) * 0.01;
+      document.documentElement.style.setProperty("--vh", `${vh}px`);
+    };
 
-  const viewport = window.visualViewport;
+    updateVh();
 
-  const update = () => {
-    // fallback to window.innerHeight for browsers without visualViewport
-    const height = viewport ? viewport.height : window.innerHeight;
+    viewport?.addEventListener("resize", updateVh);
+    viewport?.addEventListener("scroll", updateVh);
 
-    // avoid white gap on Safari
-    void document.body.offsetHeight;
-
-    const h = Math.round(height);
-    setViewportHeight(h);
-
-    setMaxViewportHeight(prev =>
-      prev === null ? h : Math.max(prev, h)
-    );
-  };
-
-  update();
-
-  // Attach listeners only if visualViewport exists
-  if (viewport) {
-    viewport.addEventListener("resize", update);
-    viewport.addEventListener("scroll", update);
-  }
-
-  window.addEventListener("orientationchange", update);
-
-  return () => {
-    if (viewport) {
-      viewport.removeEventListener("resize", update);
-      viewport.removeEventListener("scroll", update);
-    }
-    window.removeEventListener("orientationchange", update);
-  };
-}, [isMobile]);
-
-
-  // amount covered by keyboard
-  const keyboardOverlayHeight =
-    isMobile && maxViewportHeight
-      ? Math.max(0, maxViewportHeight - viewportHeight)
-      : 0;
+    return () => {
+      viewport?.removeEventListener("resize", updateVh);
+      viewport?.removeEventListener("scroll", updateVh);
+    };
+  }, []);
 
   /* --------------------------------------------------------
-      Theme
+      THEME
   -------------------------------------------------------- */
   const [theme, setTheme] = useState<"light" | "dark">(() => {
     const saved = localStorage.getItem("theme");
@@ -88,7 +57,7 @@ useEffect(() => {
   }, []);
 
   /* --------------------------------------------------------
-      Endpoint switching
+      ENDPOINT SWITCHER
   -------------------------------------------------------- */
   const handleSwap = useCallback(() => {
     const current =
@@ -109,15 +78,12 @@ useEffect(() => {
     window.location.reload();
   }, [endpoint]);
 
-  /* --------------------------------------------------------
-      Memoized navigation + sidebar
-  -------------------------------------------------------- */
   const navLinks = useMemo(
     () => [
       { path: "/", label: "Chat" },
       { path: "/settings", label: "Settings" },
       { path: "https://about.ktulhu.com", label: "About" },
-      { path: "/logs", label: "Logs" },
+      { path: "/logs", label: "Logs" }
     ],
     []
   );
@@ -128,73 +94,87 @@ useEffect(() => {
   );
 
   /* --------------------------------------------------------
-      Layout
+      LAYOUT
   -------------------------------------------------------- */
+
+  // Define header + footer heights for correct viewport calc
+  const HEADER_HEIGHT = isMobile ? 48 : 64; // adjust if needed
+  const FOOTER_HEIGHT = 40; // adjust if needed
+
   return (
     <>
       <div
-        className="flex flex-col overflow-hidden bg-app-bg dark:bg-app-bg-dark text-app-text dark:text-app-text-dark"
-        style={{
-          height: isMobile ? `${viewportHeight}px` : "100vh",
-          // ensures no white background ever shows
-          backgroundColor: "var(--color-bg, #000)",
-        }}
+        className="
+          flex flex-col 
+          h-screen 
+          overflow-hidden 
+          bg-app-bg dark:bg-app-bg-dark
+          text-app-text dark:text-app-text-dark
+        "
       >
-
-        {/* Header */}
+        {/* HEADER */}
         {isMobile ? (
-          <div className="flex items-center justify-between border-b border-header-border dark:border-header-border-dark bg-header-bg dark:bg-header-bg-dark px-2 py-2">
+          <div
+            className="flex items-center justify-between border-b border-header-border dark:border-header-border-dark
+                       bg-header-bg dark:bg-header-bg-dark px-2"
+            style={{ height: HEADER_HEIGHT }}
+          >
             <ChatSidebarMobile onSelectChat={id => console.log("Open chat:", id)} />
           </div>
         ) : (
-          <ShellHeaderDesktop
-            location={location}
-            navLinks={navLinks}
-            endpoint={endpoint}
-            onSwap={handleSwap}
-            onToggleTheme={toggleTheme}
-            theme={theme}
-          />
+          <div style={{ height: HEADER_HEIGHT }}>
+            <ShellHeaderDesktop
+              location={location}
+              navLinks={navLinks}
+              endpoint={endpoint}
+              onSwap={handleSwap}
+              onToggleTheme={toggleTheme}
+              theme={theme}
+            />
+          </div>
         )}
 
-        {/* Body */}
+        {/* BODY */}
         <div className="flex flex-1 min-h-0 overflow-hidden">
-
-          {/* Desktop sidebar */}
+          {/* DESKTOP SIDEBAR */}
           {!isMobile && (
             <div className="hidden md:flex md:w-2/12 lg:w-2/12 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700">
               {MemoizedSidebar}
             </div>
           )}
 
-          {/* Main Content */}
+          {/* MAIN CONTENT */}
           <main className="flex-1 overflow-hidden flex flex-col min-h-0">
-            <Container className="flex flex-col flex-1 min-h-0 overflow-hidden">
-              <div className="flex-1 min-h-0 flex flex-col">
+            <Container
+              className="flex flex-col flex-1 min-h-0 overflow-hidden"
+            >
+              {/* The ACTUAL RESIZING SCROLL AREA */}
+              <div
+                className="overflow-y-auto min-h-0"
+                style={{
+                  height: `calc((var(--vh, 1vh) * 100) - ${HEADER_HEIGHT}px - ${FOOTER_HEIGHT}px)`
+                }}
+              >
                 <Outlet />
               </div>
             </Container>
           </main>
         </div>
 
-        {/* Footer */}
+        {/* FOOTER */}
         <footer
-          className="flex-none py-2 text-center text-xs border-t border-header-border bg-header-bg/70 dark:border-header-border-dark dark:bg-header-bg-dark/70"
+          className="
+            flex-none 
+            border-t border-header-border dark:border-header-border-dark
+            bg-header-bg/70 dark:bg-header-bg-dark/70
+            text-xs text-center
+            flex items-center justify-center
+          "
+          style={{ height: FOOTER_HEIGHT }}
         >
           © {new Date().getFullYear()} Ktulhu-Project
         </footer>
       </div>
-
-      {/* Keyboard gap filler (always covers space Safari exposes) */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none fixed left-0 right-0 bottom-0 z-[9999]"
-        style={{
-          height: `${keyboardOverlayHeight}px`,
-          backgroundColor: "var(--color-bg, #000)",
-          transition: "height 120ms ease-out",
-        }}
-      />
     </>
   );
 });
