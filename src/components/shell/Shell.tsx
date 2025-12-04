@@ -102,19 +102,18 @@ export const Shell: React.FC = React.memo(() => {
   const FOOTER_HEIGHT = 40; // adjust if needed
 
   return (
+
   <>
     <div
       className="
-        flex flex-col 
-w-full
+        flex flex-col
+        w-full
+        h-full
         overflow-hidden 
         bg-app-bg dark:bg-app-bg-dark
         text-app-text dark:text-app-text-dark
-        mx-auto
       "
-style={{
-  height: "calc(var(--vh, 1vh) * 100)"
-}}
+    
     >
 
         {/* HEADER */}

@@ -198,17 +198,21 @@ button {
 
 
 :root {
+  /* fallback so it works before JS runs */
   --vh: 1vh;
 }
 
-/* Required for full-height shell layout */
-html, body, #root {
+/* Let the whole document height follow --vh */
+html,
+body,
+#root {
   margin: 0;
   padding: 0;
   width: 100%;
-  min-height: 100%;
-  height: auto;
+  height: calc(var(--vh, 1vh) * 100);
   overflow: hidden;
+  /* match your app background so there's never a white strip */
+  background-color: var(--color-bg, #020617);
 }
 
 #root {
