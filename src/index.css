@@ -28,13 +28,6 @@ body {
   touch-action: none;
 }
 
-#root {
-  height: var(--app-viewport-height, 100dvh);
-  min-height: var(--app-viewport-height, 100dvh);
-  overflow: hidden;
-}
-
-
 html.keyboard-lock,
 body.keyboard-lock {
   position: fixed;

@@ -106,17 +106,15 @@ export const Shell: React.FC = React.memo(() => {
     <div
       className="
         flex flex-col 
-        h-screen 
+w-full
         overflow-hidden 
         bg-app-bg dark:bg-app-bg-dark
         text-app-text dark:text-app-text-dark
         mx-auto
-        max-w-[1280px]
-        w-full
       "
-      style={{
-        height: "calc(var(--vh, 1vh) * 100)" // SAFE dynamic height
-      }}
+style={{
+  height: "calc(var(--vh, 1vh) * 100)"
+}}
     >
 
         {/* HEADER */}

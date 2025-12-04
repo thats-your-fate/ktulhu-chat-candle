@@ -169,38 +169,46 @@ export default function ChatComponent() {
   /* ------------------------------------------------------ */
   /*  UI                                                    */
   /* ------------------------------------------------------ */
-  return (
-    <Container className="flex flex-1 h-full min-h-0 justify-center">
-      <Pannel className="flex flex-col w-full h-full min-h-0 relative overflow-hidden">
-        <PannelBody
-          ref={scrollRef as any}
-          className="flex-1 overflow-y-auto pb-[120px] relative"
-        >
-          <MessageList history={history} loading={loading} />
+return (
+  <div className="flex flex-1 h-full min-h-0 justify-center w-full">
+    <Pannel className="flex flex-col w-full h-full min-h-0 relative overflow-hidden">
 
-          <SystemStatusBanner text={liveStatus ?? null} />
-        </PannelBody>
+      {/* Scrollable message area */}
+      <PannelBody
+        ref={scrollRef as any}
+        className="flex-1 overflow-y-auto relative pb-safe-bottom"
+      >
+        <MessageList history={history} loading={loading} />
+        <SystemStatusBanner text={liveStatus ?? null} />
+      </PannelBody>
 
-        <div
-          className={`absolute bottom-0 left-0 right-0 border-t px-4 py-3 ${
-            isiOS
-              ? "bg-header-bg/95 dark:bg-header-bg-dark/95"
-              : "backdrop-blur-sm bg-header-bg/70 dark:bg-header-bg-dark/70"
-          }`}
-        >
-          <InputArea
-            value={input}
-            onChange={setInput}
-            onSend={handleSend}
-            placeholder={isSending ? "Model is thinking..." : "Send a message..."}
-            disabled={isSending}
-          />
-<div className="text-xs text-gray-500 mt-2 hidden sm:block">
-  Chat ID: {chatId} • Model: {DEFAULT_MODEL}
-</div>
+      {/* Composer (NOT ABSOLUTE ANYMORE) */}
+      <div
+        className={`
+          border-t px-4 py-3 w-full 
+          ${isiOS 
+            ? "bg-header-bg/95 dark:bg-header-bg-dark/95" 
+            : "backdrop-blur-sm bg-header-bg/70 dark:bg-header-bg-dark/70"
+          }
+        `}
+        style={{
+          paddingBottom: "env(safe-area-inset-bottom)"
+        }}
+      >
+        <InputArea
+          value={input}
+          onChange={setInput}
+          onSend={handleSend}
+          placeholder={isSending ? "Model is thinking..." : "Send a message..."}
+          disabled={isSending}
+        />
 
+        <div className="text-xs text-gray-500 mt-2 hidden sm:block">
+          Chat ID: {chatId} • Model: {DEFAULT_MODEL}
         </div>
-      </Pannel>
-    </Container>
-  );
+      </div>
+
+    </Pannel>
+  </div>
+);
 }

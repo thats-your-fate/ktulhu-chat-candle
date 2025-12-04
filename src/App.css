@@ -18,6 +18,9 @@ html, body, #root {
 
 /* Optional: inherit your colors, resets, etc */
 
+.pb-safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
 
 
 .logo {
