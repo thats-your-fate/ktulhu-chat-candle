@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { v4 as uuidv4 } from "uuid";
 
-import { Container } from "../../components/ui/Container";
 import { Pannel, PannelBody } from "../../components/ui/Pannel";
 
 import { MessageList } from "./components/MessageList";

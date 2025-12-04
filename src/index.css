@@ -28,6 +28,8 @@ body {
   touch-action: none;
 }
 
+
+
 html.keyboard-lock,
 body.keyboard-lock {
   position: fixed;
