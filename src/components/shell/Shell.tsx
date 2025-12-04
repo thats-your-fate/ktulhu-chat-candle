@@ -30,7 +30,16 @@ export const Shell: React.FC = React.memo(() => {
   const keyboardVisible =
     isMobile &&
     (keyboardHeightReduced || (isiOS && mobileViewportOffset > KEYBOARD_THRESHOLD));
+  // Difference between the maximum available viewport height and the current visible height.
+  const keyboardFillHeight =
+    keyboardVisible &&
+    mobileViewportHeight !== null &&
+    maxViewportHeight !== null
+      ? Math.max(0, maxViewportHeight - mobileViewportHeight)
+      : 0;
   const verticalOffset = keyboardVisible ? 0 : keyboardOffset;
+  const keyboardOverlayHeight = isiOS && keyboardVisible ? keyboardFillHeight : 0;
+  const footerFixed = isiOS && keyboardVisible;
 
 
   useEffect(() => {
@@ -187,7 +196,7 @@ export const Shell: React.FC = React.memo(() => {
   return (
     <>
       <div
-      className={`
+        className={`
         flex flex-col h-screen overflow-hidden box-border
         bg-app-bg text-app-text
         dark:bg-app-bg-dark dark:text-app-text-dark
@@ -242,11 +251,33 @@ export const Shell: React.FC = React.memo(() => {
     border-header-border bg-header-bg/70 text-footer-text 
     dark:border-header-border-dark dark:bg-header-bg-dark/70 dark:text-footer-text-dark
   `}
+        style={
+          footerFixed
+            ? {
+                position: "fixed",
+                left: 0,
+                right: 0,
+                bottom: keyboardOverlayHeight ? `${keyboardOverlayHeight}px` : 0,
+                paddingBottom: "env(safe-area-inset-bottom, 0px)",
+                zIndex: 70,
+              }
+            : undefined
+        }
       >
         © {new Date().getFullYear()} Ktulhu-Project
       </footer>
 
     </div>
+    <div
+      aria-hidden="true"
+      className="pointer-events-none fixed left-0 right-0 z-[60] transition-[height] duration-150 ease-out"
+      style={{
+        bottom: 0,
+        height: keyboardOverlayHeight ? `${keyboardOverlayHeight}px` : 0,
+        backgroundColor: "var(--color-bg)",
+        opacity: keyboardOverlayHeight ? 1 : 0,
+      }}
+    />
     </>
   );
 });
