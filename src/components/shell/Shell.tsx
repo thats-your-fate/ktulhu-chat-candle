@@ -21,36 +21,45 @@ export const Shell: React.FC = React.memo(() => {
 
   const [maxViewportHeight, setMaxViewportHeight] = useState<number | null>(null);
 
-  useEffect(() => {
-    if (!isMobile || typeof window === "undefined") return;
+useEffect(() => {
+  if (!isMobile || typeof window === "undefined") return;
 
-    const viewport = window.visualViewport;
+  const viewport = window.visualViewport;
 
-    const update = () => {
-      if (!viewport) return;
+  const update = () => {
+    // fallback to window.innerHeight for browsers without visualViewport
+    const height = viewport ? viewport.height : window.innerHeight;
 
-      // Force Safari to flush layout → avoids white gap
-      void document.body.offsetHeight;
+    // avoid white gap on Safari
+    void document.body.offsetHeight;
 
-      const h = Math.round(viewport.height);
-      setViewportHeight(h);
+    const h = Math.round(height);
+    setViewportHeight(h);
 
-      setMaxViewportHeight(prev =>
-        prev === null ? h : Math.max(prev, h)
-      );
-    };
+    setMaxViewportHeight(prev =>
+      prev === null ? h : Math.max(prev, h)
+    );
+  };
 
-    update();
+  update();
+
+  // Attach listeners only if visualViewport exists
+  if (viewport) {
     viewport.addEventListener("resize", update);
     viewport.addEventListener("scroll", update);
-    window.addEventListener("orientationchange", update);
+  }
 
-    return () => {
+  window.addEventListener("orientationchange", update);
+
+  return () => {
+    if (viewport) {
       viewport.removeEventListener("resize", update);
       viewport.removeEventListener("scroll", update);
-      window.removeEventListener("orientationchange", update);
-    };
-  }, [isMobile]);
+    }
+    window.removeEventListener("orientationchange", update);
+  };
+}, [isMobile]);
+
 
   // amount covered by keyboard
   const keyboardOverlayHeight =
