@@ -88,7 +88,7 @@ export const SettingsPage: React.FC = () => {
               flex items-center gap-2 px-4 py-2 rounded-md 
               bg-red-500 text-white 
               hover:bg-red-600 transition
-            "
+            "   
           >
             <LogOut className="w-4 h-4" />
             Log out
