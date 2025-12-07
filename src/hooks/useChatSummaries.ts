@@ -41,19 +41,24 @@ function cleanSummaryText(value: any): string | null {
 }
 
 function normalizeSummaryPayload(payload: any): ChatSummary | null {
-  if (!payload?.chat_id) return null;
+  const chatId = payload?.chat_id ?? payload?.id;
+  if (!chatId) return null;
 
-  // Prefer summary/text fields for display
   const summaryText = cleanSummaryText(payload.text ?? payload.summary ?? null);
-  const ts = ensureTs(payload.ts, undefined);
+
+  const ts =
+    ensureTs(payload.ts, undefined) ??
+    ensureTs(payload.updated_ts, undefined) ??
+    Date.now();
 
   return {
-    chat_id: payload.chat_id,
+    chat_id: chatId,
     summary: summaryText,
-    text: cleanSummaryText(payload.text ?? payload.summary ?? null),
+    text: summaryText,
     ts,
   };
 }
+
 
 export function applyChatSummaryUpdate(payload: any) {
   const next = normalizeSummaryPayload(payload);
@@ -282,6 +287,8 @@ export function useChatSummaries({
         ? `/internal/chats/by-user/${user.id}`
         : `/internal/chats/by-device/${deviceHash}`;
 
+
+        console.log(endpoint)
       const res = await fetch(`${api}${endpoint}`, {
         headers: { "Accept": "application/json" },
       });
