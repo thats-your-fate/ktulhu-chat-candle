@@ -1,9 +1,11 @@
 import React from "react";
 import { useAuth } from "../../context/AuthContext";
-import { LogOut, Shield, Mail, UserCircle } from "lucide-react";
+import { useSession } from "../../context/SessionContext";
+import { LogOut, Shield, Mail, UserCircle, Smartphone } from "lucide-react";
 
 export const SettingsPage: React.FC = () => {
   const { user, logout } = useAuth();
+  const { deviceHash } = useSession(); // ← ADD THIS
 
   if (!user) {
     return (
@@ -31,6 +33,7 @@ export const SettingsPage: React.FC = () => {
 
         {/* User Info */}
         <div className="space-y-4">
+
           {/* Provider */}
           <div>
             <label className="text-sm opacity-70">Login Provider</label>
@@ -57,7 +60,16 @@ export const SettingsPage: React.FC = () => {
             </p>
           </div>
 
-          {/* JWT (preview only) */}
+          {/* Device Hash */}
+          <div>
+            <label className="text-sm opacity-70">Device Hash</label>
+            <p className="break-all flex items-center gap-2">
+              <Smartphone className="w-4 h-4 opacity-50" />
+              {deviceHash}
+            </p>
+          </div>
+
+          {/* JWT */}
           {user.jwt && (
             <div>
               <label className="text-sm opacity-70">JWT Token</label>

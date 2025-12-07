@@ -18,13 +18,18 @@ export default function App() {
     <BrowserRouter>
       <Seo />
 
-      {/* IMPORTANT: Google provider MUST wrap AuthProvider */}
       <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
-        <AuthProvider>
-          <SessionProvider>
+        
+        {/* MUST BE FIRST */}
+        <SessionProvider>                     {/* ✔ provides deviceHash */}
+          
+          {/* Auth now has access to useSession() */}
+          <AuthProvider>                      {/* ✔ login handlers use deviceHash */}
+
             <AuthGate>
               <ChatStoreProvider>
                 <SocketProvider>
+
                   <Routes>
                     <Route element={<Shell />}>
                       <Route
@@ -47,19 +52,22 @@ export default function App() {
                         }
                       />
 
-<Route path="/settings" element={<SettingsPage />} />
-
+                      <Route path="/settings" element={<SettingsPage />} />
                       <Route path="/about" element={<div>About</div>} />
-
                       <Route path="/logs" element={<LogsPage />} />
                     </Route>
                   </Routes>
+
                 </SocketProvider>
               </ChatStoreProvider>
             </AuthGate>
-          </SessionProvider>
-        </AuthProvider>
+
+          </AuthProvider>
+
+        </SessionProvider>
+
       </GoogleOAuthProvider>
     </BrowserRouter>
   );
 }
+
