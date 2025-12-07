@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useSession } from "../context/SessionContext";
+import { useAuth } from "../context/AuthContext";
+
 
 export interface ChatSummary {
   chat_id: string;
@@ -110,6 +112,7 @@ export function useChatSummaries({
   persist = false,
 }: UseChatSummariesOptions = {}) {
   const { deviceHash } = useSession();
+    const { user } = useAuth();     // <--- NEW
   const [chats, setChats] = useState<ChatSummary[]>(globalChats);
   const [loading, setLoading] = useState<boolean>(globalChats.length === 0);
   const wsRef = useRef<WebSocket | null>(null);
@@ -274,10 +277,14 @@ export function useChatSummaries({
       if (isMounted) setLoading(true);
 
       try {
-        const api = normalizeBaseUrl(baseUrl);
-        const res = await fetch(`${api}/internal/chats/by-device/${deviceHash}`, {
-          headers: { "Accept": "application/json" },
-        });
+              const api = normalizeBaseUrl(baseUrl);
+      const endpoint = user
+        ? `/internal/chats/by-user/${user.id}`
+        : `/internal/chats/by-device/${deviceHash}`;
+
+      const res = await fetch(`${api}${endpoint}`, {
+        headers: { "Accept": "application/json" },
+      });
         const text = await res.text();
         if (!res.ok) throw new Error(`HTTP ${res.status}: ${text}`);
 

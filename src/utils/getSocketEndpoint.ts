@@ -3,12 +3,7 @@
  */
 
 export function getSocketEndpoint(): string {
-  return "ws://localhost:3000/ws";
+let wsE = import.meta.env.VITE_WEB_SOCK_BASE_URL; 
+    return wsE; 
 }
 
-/** Convert http/https → ws/wss */
-function normalizeToWs(url: string): string {
-  if (url.startsWith("http://")) return url.replace("http://", "ws://");
-  if (url.startsWith("https://")) return url.replace("https://", "wss://");
-  return url.startsWith("ws") ? url : `wss://${url}`;
-}
