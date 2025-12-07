@@ -6,92 +6,60 @@ import { SessionProvider } from "./context/SessionContext";
 import { Seo } from "./components/Seo";
 import { ChatStoreProvider } from "./context/ChatStoreContext";
 import { LogsPage } from "./pages/logsPage/logsPage";
+import { SettingsPage } from "./pages/Settings/SettingsPage";
 
+import { AuthProvider } from "./context/AuthContext";
+import { AuthGate } from "./components/AuthGate";
+
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 export default function App() {
   return (
     <BrowserRouter>
       <Seo />
 
-      <SessionProvider>
-        <ChatStoreProvider>
-          <SocketProvider>
-            <Routes>
-              <Route element={<Shell />}>
-
-                {/* Default home — NEW CHAT */}
-                <Route
-                  path="/"
-                  element={
-                    <>
-                      <Seo path="/" title="Ktulhu Chat" />
-                      <ChatPage />
-                    </>
-                  }
-                />
-
-                {/* EXISTING CHAT THREAD */}
-                <Route
-                  path="/chat/:chatId"
-                  element={
-                    <>
-                      <Seo
-                        path="/chat"
-                        title="Chat Thread"
-                        description="Continue your Ktulhu chat conversation."
+      {/* IMPORTANT: Google provider MUST wrap AuthProvider */}
+      <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+        <AuthProvider>
+          <SessionProvider>
+            <AuthGate>
+              <ChatStoreProvider>
+                <SocketProvider>
+                  <Routes>
+                    <Route element={<Shell />}>
+                      <Route
+                        path="/"
+                        element={
+                          <>
+                            <Seo path="/" title="Ktulhu Chat" />
+                            <ChatPage />
+                          </>
+                        }
                       />
-                      <ChatPage />
-                    </>
-                  }
-                />
 
-                {/* SETTINGS */}
-                <Route
-                  path="/settings"
-                  element={
-                    <>
-                      <Seo
-                        path="/settings"
-                        title="Ktulhu Settings"
+                      <Route
+                        path="/chat/:chatId"
+                        element={
+                          <>
+                            <Seo path="/chat" title="Chat Thread" />
+                            <ChatPage />
+                          </>
+                        }
                       />
-                      <div>Settings</div>
-                    </>
-                  }
-                />
 
-                {/* ABOUT */}
-                <Route
-                  path="/about"
-                  element={
-                    <>
-                      <Seo
-                        path="/about"
-                        title="About Ktulhu"
-                      />
-                      <div>About</div>
-                    </>
-                  }
-                />
+<Route path="/settings" element={<SettingsPage />} />
 
-                {/* LOGS */}
-                <Route
-                  path="/logs"
-                  element={
-                    <>
-                      <Seo
-                        path="/logs"
-                        title="Inference Logs"
-                      />
-                      <LogsPage/>
-                    </>
-                  }
-                />
+                      <Route path="/about" element={<div>About</div>} />
 
-              </Route>
-            </Routes>
-          </SocketProvider>
-        </ChatStoreProvider>
-      </SessionProvider>
+                      <Route path="/logs" element={<LogsPage />} />
+                    </Route>
+                  </Routes>
+                </SocketProvider>
+              </ChatStoreProvider>
+            </AuthGate>
+          </SessionProvider>
+        </AuthProvider>
+      </GoogleOAuthProvider>
     </BrowserRouter>
   );
 }

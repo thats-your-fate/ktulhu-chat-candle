@@ -132,6 +132,26 @@ export default {
         "2xl": "1rem",
         "3xl": "1.5rem",
       },
+        keyframes: {
+    ktulhuAppear: {
+      "0%": {
+        transform: "scale(0) rotate(-180deg)",
+        opacity: "0",
+      },
+      "60%": {
+        transform: "scale(1.2) rotate(10deg)",
+        opacity: "1",
+      },
+      "100%": {
+        transform: "scale(1) rotate(0deg)",
+        opacity: "1",
+      },
+    },
+  },
+  animation: {
+    ktulhuAppear: "ktulhuAppear 800ms cubic-bezier(0.22, 1, 0.36, 1)",
+  },
+  
     },
   },
   plugins: [],

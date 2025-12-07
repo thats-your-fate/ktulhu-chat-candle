@@ -3,9 +3,7 @@
  */
 
 export function getSocketEndpoint(): string {
-
-
-  return normalizeToWs("https://backend.ktulhu.com/ws");
+  return "ws://localhost:3000/ws";
 }
 
 /** Convert http/https → ws/wss */

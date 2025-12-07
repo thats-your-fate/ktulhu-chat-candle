@@ -9,6 +9,7 @@ import React, {
 import { v4 as uuidv4 } from "uuid";
 import { useNavigate, useLocation } from "react-router-dom";
 
+
 type SessionContextType = {
   deviceHash: string;
   sessionId: string;
