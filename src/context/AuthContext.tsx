@@ -4,7 +4,6 @@ import { useSession } from "../context/SessionContext";
 
 export type AuthProviderType = "anonymous" | "google" | "apple" | "facebook" | "email";
 
-
 export type AuthUser = {
   id: string;
   email?: string;
@@ -17,7 +16,9 @@ type AuthContextType = {
   loginAnonymous: () => void;
   loginGoogle: (idToken: string) => Promise<void>;
   loginApple: (idToken: string) => Promise<void>;
-    loginFacebook: (idToken: string) => Promise<void>;
+  loginFacebook: (accessToken: string) => Promise<void>;
+  loginEmail: (email: string, password: string) => Promise<void>;
+  registerEmail: (email: string, password: string) => Promise<void>;
   logout: () => void;
 };
 
@@ -27,7 +28,8 @@ const STORAGE_KEY = "ktulhu_auth_user";
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
-  const { deviceHash } = useSession();  // <-- GET IT HERE
+  const { deviceHash } = useSession(); // <-- GET IT HERE
+
   // -----------------------------
   // Load persisted user on startup
   // -----------------------------
@@ -62,16 +64,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const loginGoogle = async (idToken: string) => {
     const res = await fetch("http://localhost:3000/api/auth/google", {
       method: "POST",
-      headers: { "Content-Type": "application/json",  "X-Device-Hash": deviceHash, },
-    body: JSON.stringify({
-      id_token: idToken,
-      device_hash: deviceHash,
-    }),
+      headers: {
+        "Content-Type": "application/json",
+        "X-Device-Hash": deviceHash,
+      },
+      body: JSON.stringify({
+        id_token: idToken,
+        device_hash: deviceHash,
+      }),
     });
 
     if (!res.ok) {
       console.error("Google login failed");
-      return;
+      const msg = await res.text();
+      throw new Error(msg || "Google login failed");
     }
 
     const data = await res.json();
@@ -87,16 +93,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const loginApple = async (idToken: string) => {
     const res = await fetch("http://localhost:3000/api/auth/apple", {
       method: "POST",
-      headers: { "Content-Type": "application/json",  "X-Device-Hash": deviceHash, },
-    body: JSON.stringify({
-      id_token: idToken,
-      device_hash: deviceHash,
-    }),
+      headers: {
+        "Content-Type": "application/json",
+        "X-Device-Hash": deviceHash,
+      },
+      body: JSON.stringify({
+        id_token: idToken,
+        device_hash: deviceHash,
+      }),
     });
 
     if (!res.ok) {
       console.error("Apple login failed");
-      return;
+      const msg = await res.text();
+      throw new Error(msg || "Apple login failed");
     }
 
     const data = await res.json();
@@ -109,55 +119,103 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     persist(newUser);
   };
 
+  // ✅ Pure backend call – LoginPage handles FB popup and passes accessToken
+  const loginFacebook = async (accessToken: string) => {
+    const res = await fetch("http://localhost:3000/api/auth/facebook", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Device-Hash": deviceHash,
+      },
+      body: JSON.stringify({
+        access_token: accessToken,
+        device_hash: deviceHash,
+      }),
+    });
 
-  const loginFacebook = async () => {
-  return new Promise<void>((resolve, reject) => {
-    if (!window.FB) {
-      console.error("FB SDK not loaded");
-      return reject();
+    if (!res.ok) {
+      console.error("FB backend login failed");
+      const msg = await res.text();
+      throw new Error(msg || "Facebook login failed");
     }
 
-    window.FB.login(
-      async (response: any) => {
-        if (!response.authResponse) {
-          console.error("Facebook login failed");
-          return reject();
-        }
+    const data = await res.json();
 
-        const { accessToken } = response.authResponse;
+    const newUser: AuthUser = {
+      id: data.user_id,
+      email: data.email,
+      provider: "facebook",
+      jwt: data.jwt,
+    };
 
-        // Send token to backend
-        const res = await fetch("http://localhost:3000/api/auth/facebook", {
-          method: "POST",
-          headers: { "Content-Type": "application/json",  "X-Device-Hash": deviceHash, },
-  body: JSON.stringify({
-    access_token: accessToken,
-    device_hash: deviceHash,
-  }),
-        });
+    persist(newUser);
+  };
 
-        if (!res.ok) {
-          console.error("FB backend login failed");
-          return reject();
-        }
-
-        const data = await res.json();
-
-        setUser({
-          id: data.user_id,
-          email: data.email,
-          provider: "facebook",
-          jwt: data.jwt,
-        });
-
-        resolve();
+  // ✅ EMAIL LOGIN
+  const loginEmail = async (email: string, password: string) => {
+    const res = await fetch("http://localhost:3000/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Device-Hash": deviceHash,
       },
-      { scope: "public_profile,email" }
-    );
-  });
-};
+      body: JSON.stringify({
+        email,
+        password,
+        device_hash: deviceHash,
+      }),
+    });
 
+    if (!res.ok) {
+      console.error("Email login failed");
+      const msg = await res.text();
+      throw new Error(msg || "Email login failed");
+    }
 
+    const data = await res.json();
+
+    const newUser: AuthUser = {
+      id: data.user_id,
+      email: data.email,
+      provider: "email",
+      jwt: data.jwt,
+    };
+
+    persist(newUser);
+  };
+
+  // ✅ EMAIL REGISTER
+  const registerEmail = async (email: string, password: string) => {
+    const res = await fetch("http://localhost:3000/api/auth/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Device-Hash": deviceHash,
+      },
+      body: JSON.stringify({
+        email,
+        password,
+        device_hash: deviceHash,
+      }),
+    });
+
+    if (!res.ok) {
+      console.error("Email register failed");
+      const msg = await res.text();
+      throw new Error(msg || "Email registration failed");
+    }
+
+    const data = await res.json();
+
+    const newUser: AuthUser = {
+      id: data.user_id,
+      email: data.email,
+      provider: "email",
+      jwt: data.jwt,
+    };
+
+    persist(newUser);
+  };
 
   const logout = () => {
     persist(null);
@@ -165,8 +223,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   return (
     <AuthContext.Provider
-value={{ user, loginAnonymous, loginGoogle, loginApple, loginFacebook, logout }}
-
+      value={{
+        user,
+        loginAnonymous,
+        loginGoogle,
+        loginApple,
+        loginFacebook,
+        loginEmail,
+        registerEmail,
+        logout,
+      }}
     >
       {children}
     </AuthContext.Provider>

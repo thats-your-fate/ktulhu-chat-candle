@@ -1,5 +1,5 @@
 // src/pages/Login/LoginPage.tsx
-import React from "react";
+import React, { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { User, Mail } from "lucide-react";
 import { BrandIcon } from "../../components/BrandIcon";
@@ -8,7 +8,21 @@ import { TypewriterText } from "../../components/TypewriterText";
 import { GoogleLogin } from "@react-oauth/google";
 
 export const LoginPage: React.FC = () => {
-  const { loginAnonymous, loginGoogle, loginApple, loginFacebook } = useAuth();
+  const {
+    loginAnonymous,
+    loginGoogle,
+    loginApple,
+    loginFacebook,
+    loginEmail,
+    registerEmail,
+  } = useAuth();
+
+  const [emailOpen, setEmailOpen] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isRegisterMode, setIsRegisterMode] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleAppleLogin = async () => {
     const clientId = import.meta.env.VITE_APPLE_CLIENT_ID as string;
@@ -39,10 +53,28 @@ export const LoginPage: React.FC = () => {
     }
   };
 
+  const handleEmailSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setIsSubmitting(true);
+
+    try {
+      if (isRegisterMode) {
+        await registerEmail(email, password);
+      } else {
+        await loginEmail(email, password);
+      }
+      // If successful, context will update & page will redirect based on your routing
+    } catch (err: any) {
+      setError(err?.message ?? "Email authentication failed");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="flex items-center justify-center w-full h-full bg-app-bg dark:bg-app-bg-dark text-app-text dark:text-app-text-dark px-6 py-10">
       <div className="w-full max-w-sm flex flex-col items-center bg-header-bg/70 dark:bg-header-bg-dark/70 backdrop-blur-md border border-header-border dark:border-header-border-dark rounded-xl shadow-lg p-8">
-
         {/* Header */}
         <div className="flex flex-col items-center gap-4 mb-2">
           <div className="flex items-center gap-3">
@@ -59,56 +91,150 @@ export const LoginPage: React.FC = () => {
           {/* Anonymous */}
           <button
             onClick={loginAnonymous}
-            className="flex items-center gap-3 w-full p-3 rounded-md bg-chat-item-bg dark:bg-chat-item-bg-dark text-chat-item-text dark:text-chat-item-text-dark border border-header-border/50 dark:border-header-border-dark/50 transition hover:opacity-80"
+            className="  flex items-center gap-3 w-full h-10 px-3
+  rounded box-border
+  font-sans text-[14px] tracking-[0.25px]
+  select-none appearance-none
+  transition-colors duration-200 hover:opacity-80
+
+
+  bg-white text-[#3c4043] border border-[#dadce0]
+
+
+  dark:bg-chat-item-bg-dark 
+  dark:text-chat-item-text-dark 
+  dark:border-header-border-dark/50"
           >
             <User className="w-5 h-5 opacity-80" />
             <span className="flex-1 text-left">Continue anonymously</span>
           </button>
 
           {/* Google */}
-            <GoogleLogin
-              onSuccess={(res) => {
-                if (res.credential) loginGoogle(res.credential);
-              }}
-              onError={() => console.log("Google login failed")}
-            />
-
+          <GoogleLogin
+            onSuccess={(res) => {
+              if (res.credential) loginGoogle(res.credential);
+            }}
+            onError={() => console.log("Google login failed")}
+          />
 
           {/* Apple */}
           <button
             onClick={handleAppleLogin}
-            className="flex items-center gap-3 w-full p-3 rounded-md bg-chat-item-bg dark:bg-chat-item-bg-dark text-chat-item-text dark:text-chat-item-text-dark border border-header-border/50 dark:border-header-border-dark/50 transition hover:opacity-80"
+            className="  flex items-center gap-3 w-full h-10 px-3
+  rounded box-border
+  font-sans text-[14px] tracking-[0.25px]
+  select-none appearance-none
+  transition-colors duration-200 hover:opacity-80
+
+
+  bg-white text-[#3c4043] border border-[#dadce0]
+
+
+  dark:bg-chat-item-bg-dark 
+  dark:text-chat-item-text-dark 
+  dark:border-header-border-dark/50"
           >
             <BrandIcon name="apple" size={20} />
             <span className="flex-1 text-left">Continue with Apple</span>
           </button>
 
+          {/* Email: toggle + form */}
           <button
-  onClick={() => {
-    // Trigger FB popup
-    window.FB.login((response: any) => {
-      if (response.authResponse?.accessToken) {
-        loginFacebook(response.authResponse.accessToken);
-      } else {
-        console.error("FB login canceled");
-      }
-    }, { scope: "email,public_profile" });
-  }}
-  className="flex items-center gap-3 w-full p-3 rounded-md bg-chat-item-bg dark:bg-chat-item-bg-dark text-chat-item-text dark:text-chat-item-text-dark border border-header-border/50 dark:border-header-border-dark/50 transition hover:opacity-80"
->
-  <BrandIcon name="facebook" size={20} />
-  <span className="flex-1 text-left">Continue with Facebook</span>
-</button>
+            onClick={() => setEmailOpen((prev) => !prev)}
+            className="  flex items-center gap-3 w-full h-10 px-3
+  rounded box-border
+  font-sans text-[14px] tracking-[0.25px]
+  select-none appearance-none
+  transition-colors duration-200 hover:opacity-80
 
 
-          {/* Email placeholder */}
-          <button
-            onClick={() => console.log("TODO: email auth")}
-            className="flex items-center gap-3 w-full p-3 rounded-md bg-chat-item-bg dark:bg-chat-item-bg-dark text-chat-item-text dark:text-chat-item-text-dark border border-header-border/50 dark:border-header-border-dark/50 transition hover:opacity-80"
+  bg-white text-[#3c4043] border border-[#dadce0]
+
+
+  dark:bg-chat-item-bg-dark 
+  dark:text-chat-item-text-dark 
+  dark:border-header-border-dark/50"
           >
             <Mail className="w-5 h-5 opacity-80" />
-            <span className="flex-1 text-left">Continue with Email</span>
+            <span className="flex-1 text-left">
+              {emailOpen ? "Hide email form" : "Continue with Email"}
+            </span>
           </button>
+
+          {emailOpen && (
+            <form onSubmit={handleEmailSubmit} className="flex flex-col gap-2 mt-1">
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Email"
+                className="w-full p-2 rounded-md bg-app-bg/70 dark:bg-app-bg-dark/70 border border-header-border/50 dark:border-header-border-dark/50 text-sm"
+              />
+              <input
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password"
+                className="w-full p-2 rounded-md bg-app-bg/70 dark:bg-app-bg-dark/70 border border-header-border/50 dark:border-header-border-dark/50 text-sm"
+              />
+
+              {error && (
+                <p className="text-xs text-red-500 mt-1">
+                  {error}
+                </p>
+              )}
+
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="  flex items-center gap-3 w-full h-10 px-3
+  rounded box-border
+  font-sans text-[14px] tracking-[0.25px]
+  select-none appearance-none
+  transition-colors duration-200 hover:opacity-80
+
+
+  bg-white text-[#3c4043] border border-[#dadce0]
+
+
+  dark:bg-chat-item-bg-dark 
+  dark:text-chat-item-text-dark 
+  dark:border-header-border-dark/50"
+              >
+                {isSubmitting
+                  ? isRegisterMode
+                    ? "Creating account..."
+                    : "Signing in..."
+                  : isRegisterMode
+                    ? "Create account"
+                    : "Sign in"}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsRegisterMode((prev) => !prev)}
+                className="  flex items-center gap-3 w-full h-10 px-3
+  rounded box-border
+  font-sans text-[14px] tracking-[0.25px]
+  select-none appearance-none
+  transition-colors duration-200 hover:opacity-80
+
+
+  bg-white text-[#3c4043] border border-[#dadce0]
+
+
+  dark:bg-chat-item-bg-dark 
+  dark:text-chat-item-text-dark 
+  dark:border-header-border-dark/50"
+              >
+                {isRegisterMode
+                  ? "Already have an account? Sign in"
+                  : "Need an account? Register"}
+              </button>
+            </form>
+          )}
         </div>
       </div>
     </div>
